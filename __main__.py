@@ -15,7 +15,7 @@ from gateway.exceptions import VariableNotFoundError
 from gateway.source_handler import CanHandler, CandumpHandler
 
 _mqtt_settings = {}
-
+_can_settings = {}
 
 def get_env_settings_safe(env_name, settings_name, settings, default=None):
     if env_name in os.environ:
@@ -46,6 +46,12 @@ def parse_mqtt_settings(element):
     except VariableNotFoundError as e:
         logging.error(e)
 
+def parse_can_settings(element):
+    try:
+        _can_settings["interface"] = get_env_settings_safe("CAN_INTERFACE", "interface", element, default="can0")
+    except VariableNotFoundError as e:
+        logging.error(e)
+
 
 def parse_settings(settings_file):
     """Parse settings file"""
@@ -58,7 +64,8 @@ def parse_settings(settings_file):
             parse_requests(element)
         if item == "mqtt":
             parse_mqtt_settings(element)
-
+        if item == "can":
+            parse_can_settings(element)
 
 @click.command()
 @click.option('-v', '--verbose', is_flag=True, help="Debug output")
@@ -70,9 +77,13 @@ def main(verbose, file, settings, environment_file):
     Run main application with can interface
     """
     logging.basicConfig()
+    
+    # Settings file
+    parse_settings(settings)
+
     # Choose right handler
     if file is None:
-        can0 = CanHandler("can0")
+        can0 = CanHandler(_can_settings["interface"])
     else:
         can0 = CandumpHandler(file)
 
@@ -88,9 +99,6 @@ def main(verbose, file, settings, environment_file):
         load_dotenv(dotenv_path=environment_file, verbose=True if verbose else False)
     else:
         load_dotenv(verbose=True if verbose else False)
-
-    # Settings file
-    parse_settings(settings)
 
     # Setup mqtt
     mqtt_client = None

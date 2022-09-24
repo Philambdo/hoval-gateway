@@ -4,6 +4,9 @@ mqtt:
   topic: "hoval-gw"
   port: 8883
 
+can:
+  interface: "slcan0"
+
 requests:
   - device_type: 10
     device_id: 8
