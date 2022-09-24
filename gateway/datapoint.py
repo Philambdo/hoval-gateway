@@ -8,7 +8,7 @@ datapoints_by_id = {}
 class Datapoint:
     """Datapoint of CAN messages"""
 
-    def __init__(self, name, function_group, function_number, datapoint_id, datatype, decimal):
+    def __init__(self, name, function_group, function_number, datapoint_id, datatype, decimal, limits):
         self.name = name
         self.function_group = function_group
         self.function_number = function_number
