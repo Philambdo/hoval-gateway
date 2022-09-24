@@ -78,7 +78,7 @@ def parse_datapoints(element):
                        datapoint_id=datapoint_item["datapoint_id"],
                        datatype=datapoint_item["type"],
                        decimal=_get_settings_data_safe(datapoint_item, "decimal", int),
-                       limits=_get_settings_data_safe(datapoint_item, "limits", {})
+                       limits=_get_settings_data_safe(datapoint_item, "limits", {}))
         datapoints_by_id[(datapoint_item["function_group"],
                           datapoint_item["function_number"],
                           datapoint_item["datapoint_id"])] = dp
