@@ -15,7 +15,7 @@ class Datapoint:
         self.datapoint_id = datapoint_id
         self.datatype = datatype
         self.decimal = decimal
-        self.limits = {}
+        self.limits = limits
 
     def get_datapoint_type(self):
         """Get type of datapoint"""
