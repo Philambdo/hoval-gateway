@@ -15,6 +15,7 @@ class Datapoint:
         self.datapoint_id = datapoint_id
         self.datatype = datatype
         self.decimal = decimal
+        self.limits = {}
 
     def get_datapoint_type(self):
         """Get type of datapoint"""
@@ -36,6 +37,10 @@ class Datapoint:
             return String()
         else:
             raise UnknownDatatypeError(str.format("Datatype {} not known", self.datatype))
+
+    def get_datapoint_limits(self):
+        """"Get configured outer limits for datapoint"""
+        return self.limits
 
     def get_datapoint_by_bytes(self):
         return self.datapoint_id.to_bytes(2, byteorder='big', signed=False)
@@ -72,7 +77,8 @@ def parse_datapoints(element):
                        function_number=datapoint_item["function_number"],
                        datapoint_id=datapoint_item["datapoint_id"],
                        datatype=datapoint_item["type"],
-                       decimal=_get_settings_data_safe(datapoint_item, "decimal", int))
+                       decimal=_get_settings_data_safe(datapoint_item, "decimal", int),
+                       limits=_get_settings_data_safe(datapoint_item, "limits", {})
         datapoints_by_id[(datapoint_item["function_group"],
                           datapoint_item["function_number"],
                           datapoint_item["datapoint_id"])] = dp

@@ -58,8 +58,14 @@ class ReceiveMessage(Message):
         function_number = self.data[3]
         datapoint_id = int.from_bytes(self.data[4:6], byteorder='big', signed=False)
         read_datapoint = datapoint.get_datapoint_by_id(function_group, function_number, datapoint_id)
-        return read_datapoint, Operation(self.operation_id), read_datapoint.get_datapoint_type().convert_from_bytes(
-            self.data[6:])
+        datapoint_limits = read_datapoint.get_datapoint_limits()
+        converted_value = read_datapoint.get_datapoint_type().convert_from_bytes(self.data[6:])
+        if "lower" in datapoint_limits and "upper" in datapoint_limits:
+            if converted_value < datapoint_limits["lower"] or \
+                converted_value > datapoint_limits["upper"]:
+                raise NoValidMessageException(f"Message with Value {converted_value} is out of bounds of limits {datapoint_limits}")
+
+        return read_datapoint, Operation(self.operation_id), converted_value
 
     def __str__(self):
         return "Receive Message: id: {}, priority: {}, operation: {}, nb_remaining: {}, message_len: {}, " \
