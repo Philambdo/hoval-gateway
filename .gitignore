@@ -1,4 +1,3 @@
-settings.yml
 # Created by .ignore support plugin (hsz.mobi)
 ### Python template
 # Byte-compiled / optimized / DLL files
@@ -153,3 +152,5 @@ fabric.properties
 # specific for this project
 !/tests/data/*
 
+# No need for that
+settings.yml
