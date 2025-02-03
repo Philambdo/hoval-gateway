@@ -1,9 +1,11 @@
 from enum import Enum
 
+import logging
 import can
 
 from gateway import datapoint
 from gateway.exceptions import NoValidMessageException
+from gateway.datatypes import Unsigned, Signed, List, String
 
 
 class Operation(Enum):
@@ -57,6 +59,45 @@ class ReceiveMessage(Message):
         function_group = self.data[2]
         function_number = self.data[3]
         datapoint_id = int.from_bytes(self.data[4:6], byteorder='big', signed=False)
+        datapoint_value = self.data[6:]
+        # Ab hier gibts evtl ein traced end weil kein bekanntes datum
+
+        if len(datapoint_value) == 1:
+          v1=Signed(8, 1).convert_from_bytes(datapoint_value)
+          v2=Unsigned(8, 1).convert_from_bytes(datapoint_value)
+          v3=List().convert_from_bytes(datapoint_value)
+          #try:
+          #  v4=String().convert_from_bytes(datapoint_value)
+          #except UniDecodeError as e:
+          #  v4="NOSTRING"
+          datapoints=[v1,v2,v3]
+        elif len(datapoint_value) == 2:
+          v1=Signed(16, 1).convert_from_bytes(datapoint_value)
+          v2=Unsigned(16, 1).convert_from_bytes(datapoint_value)
+          v3=List().convert_from_bytes(datapoint_value)
+          #try:
+          #  v4=String().convert_from_bytes(datapoint_value)
+          #except UniDecodeError as e:
+          #  v4="NOSTRING"
+          datapoints=[v1,v2,v3]
+        elif len(datapoint_value) == 4:
+          v1=Signed(32, 1).convert_from_bytes(datapoint_value)
+          v2=Unsigned(32, 1).convert_from_bytes(datapoint_value)
+          v3=List().convert_from_bytes(datapoint_value)
+          #try:
+          #  v4=String().convert_from_bytes(datapoint_value)
+          #except UniDecodeError as e:
+          #  v4="NOSTRING"
+          datapoints=[v1,v2,v3]
+        else:
+          v3=List().convert_from_bytes(datapoint_value)
+          #try:
+          #  v4=String().convert_from_bytes(datapoint_value)
+          #except UniDecodeError as e:
+          #  v4="NOSTRING"
+          datapoints=[v3]
+
+        logging.debug(f"FLO: FG: {function_group:2} FN: {function_number:2} ID: {datapoint_id:5} V: ({datapoints}) ORIG: {datapoint_value} LEN:{len(datapoint_value)}")
         read_datapoint = datapoint.get_datapoint_by_id(function_group, function_number, datapoint_id)
         datapoint_limits = read_datapoint.get_datapoint_limits()
         converted_value = read_datapoint.get_datapoint_type().convert_from_bytes(self.data[6:])
